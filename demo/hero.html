@@ -163,6 +163,23 @@ h1 em { font-style: italic; color: var(--bronze-deep); }
 .facts dt { font-size: 10.5px; letter-spacing: .3em; text-transform: uppercase; color: var(--bronze-deep); }
 .facts dd { margin: 0; font-family: var(--display); font-size: 22px; line-height: 1.25; }
 
+/* ---------- WIDE BAND INTERLUDE ---------- */
+.band { position: relative; height: clamp(300px, 38vw, 640px); overflow: hidden; container-type: size; margin-bottom: clamp(72px, 12vw, 160px); }
+.band .stage { animation: none; transform-origin: 30% 50%; }
+.cast.bwall  { clip-path: polygon(0 0, 80% 0, 80% 70.4%, 60% 74.6%, 30% 79.6%, 0 84.7%); }
+.cast.bwall canvas  { filter: blur(clamp(2.5px, .4cqw, 8px)); opacity: .36; }
+.cast.bfloor { clip-path: polygon(0 84.7%, 30% 79.6%, 60% 74.6%, 80% 70.4%, 88% 76%, 90% 100%, 0 100%); }
+.cast.bfloor canvas { filter: blur(clamp(3px, .6cqw, 10px)); opacity: .26; }
+.band blockquote {
+  position: absolute; z-index: 2; margin: 0;
+  left: max(clamp(16px, 7vw, 120px), env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px));
+  top: 50%; translate: 0 -62%;
+  max-width: min(620px, 60cqw);
+  font-family: var(--display); font-weight: 300; font-size: clamp(28px, min(4.4cqw, 10cqh), 64px); line-height: 1.08; text-wrap: balance;
+}
+.band blockquote em { color: var(--bronze-deep); }
+.band blockquote footer { margin-top: 18px; font-family: var(--sans); font-size: 11px; letter-spacing: .32em; text-transform: uppercase; color: var(--ink-soft); }
+
 /* ---------- SQUARE INTERLUDE ---------- */
 .quiet {
   padding-block: 0 clamp(72px, 12vw, 160px);
@@ -269,6 +286,15 @@ h1 em { font-style: italic; color: var(--bronze-deep); }
   </div>
 </section>
 
+<section class="band" aria-label="Przerywnik">
+  <div class="stage" id="bstage" style="aspect-ratio: 1916 / 821; width: max(100cqw, calc(100cqh * 2.3337));">
+    <img src="pasek.webp" alt="Długa, łagodnie zakrzywiona ściana z tynku nad podłogą z jasnego dębu, w rogu drzewko oliwne i fotel boucle przy oknie" width="1916" height="821" loading="lazy">
+    <div class="cast bwall" data-scroll="1"><canvas id="bwall"></canvas></div>
+    <div class="cast bfloor" data-scroll="1"><canvas id="bfloor"></canvas></div>
+  </div>
+  <blockquote>Każde wnętrze zaczyna się <em>od światła</em>.<footer>Milena Rajchel-Deja</footer></blockquote>
+</section>
+
 <section class="quiet" aria-label="Podejście">
   <div class="quiet-in">
     <div class="frame">
@@ -291,7 +317,9 @@ h1 em { font-style: italic; color: var(--bronze-deep); }
   const layers = [
     { el: document.getElementById('wall'),  seed: 7,  skew: 0.0 },
     { el: document.getElementById('floor'), seed: 19, skew: 0.55 },
-    { el: document.getElementById('sq'),    seed: 31, skew: 0.0 }
+    { el: document.getElementById('sq'),    seed: 31, skew: 0.0 },
+    { el: document.getElementById('bwall'),  seed: 43, skew: 0.0 },
+    { el: document.getElementById('bfloor'), seed: 57, skew: 0.55 }
   ];
 
   // Seeded random so the branch layout is identical on every load.
@@ -398,7 +426,16 @@ h1 em { font-style: italic; color: var(--bronze-deep); }
   const loop = ms => {
     frame(ms);
     px += (tx - px) * 0.04; py += (ty - py) * 0.04;
-    casts.forEach((c, i) => { const d = c.parentElement.dataset; c.style.transform = `translate(${px * -(+d.px || (i ? 10 : 16))}px, ${py * -(+d.py || (i ? 6 : 10))}px)`; });
+    casts.forEach((c, i) => {
+      const d = c.parentElement.dataset;
+      let sx = 0, sk = 0;
+      if (d.scroll) {
+        const r = c.parentElement.getBoundingClientRect();
+        const prog = Math.max(-1, Math.min(1, (r.top + r.height / 2 - innerHeight / 2) / innerHeight)); // -1..1 while passing
+        sx = prog * r.width * 0.12; sk = prog * 6;
+      }
+      c.style.transform = `translate(${sx + px * -(+d.px || (i ? 10 : 16))}px, ${py * -(+d.py || (i ? 6 : 10))}px) skewX(${sk}deg)`;
+    });
     if (started) stage.style.transform = `scale(${1 + sy * 0.06}) translate(${px * 6}px, ${sy * 30 + py * 4}px)`;
     requestAnimationFrame(loop);
   };
