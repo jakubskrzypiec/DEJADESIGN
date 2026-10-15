@@ -163,6 +163,25 @@ h1 em { font-style: italic; color: var(--bronze-deep); }
 .facts dt { font-size: 10.5px; letter-spacing: .3em; text-transform: uppercase; color: var(--bronze-deep); }
 .facts dd { margin: 0; font-family: var(--display); font-size: 22px; line-height: 1.25; }
 
+/* ---------- SQUARE INTERLUDE ---------- */
+.quiet {
+  padding-block: 0 clamp(72px, 12vw, 160px);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.quiet-in { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(32px, 7vw, 120px); align-items: center; }
+.frame { position: relative; aspect-ratio: 1; max-width: 100%; overflow: hidden; container-type: inline-size; }
+.frame img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; transition: transform 1.6s cubic-bezier(.2,.7,.2,1); }
+.frame:hover img { transform: scale(1.025); }
+.cast.sqwall { clip-path: inset(0 0 21.4% 0); }
+.cast.sqwall canvas { filter: blur(clamp(2px, .6cqw, 7px)); opacity: .34; }
+.quiet-copy { display: grid; gap: 22px; min-width: 0; }
+.quiet-copy .eyebrow { animation: none; }
+.quiet h2 { margin: 0; font-family: var(--display); font-weight: 300; font-size: clamp(34px, 4.2vw, 58px); line-height: 1.05; text-wrap: balance; }
+.quiet h2 em { color: var(--bronze-deep); }
+.quiet p { margin: 0; font-size: 17px; line-height: 1.8; color: var(--ink-soft); max-width: 46ch; }
+.quiet .ghost { justify-self: start; }
+
 /* ---------- MOTION ---------- */
 @keyframes settle { from { transform: scale(1.08); filter: brightness(1.08) saturate(.9); } to { transform: scale(1); filter: none; } }
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
@@ -186,6 +205,7 @@ h1 em { font-style: italic; color: var(--bronze-deep); }
   .intro-in { grid-template-columns: minmax(0, 1fr); }
   .facts { grid-template-columns: minmax(0, 1fr); }
   .facts div { padding: 18px 0; border-bottom: 1px solid var(--sand); }
+  .quiet-in { grid-template-columns: minmax(0, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -249,13 +269,29 @@ h1 em { font-style: italic; color: var(--bronze-deep); }
   </div>
 </section>
 
+<section class="quiet" aria-label="Podejście">
+  <div class="quiet-in">
+    <div class="frame">
+      <img src="kwadrat.webp" alt="Fotel boucle w kolorze kości słoniowej i okrągły stolik z jasnego dębu z gałązką oliwki, pod jasną, nasłonecznioną ścianą" width="1254" height="1254" loading="lazy">
+      <div class="cast sqwall" data-px="34" data-py="22"><canvas id="sq"></canvas></div>
+    </div>
+    <div class="quiet-copy">
+      <span class="eyebrow">Podejście</span>
+      <h2>Światło, faktura <em>i spokój</em>.</h2>
+      <p>Projektuję wnętrza, które bronią się w każdej porze dnia. Zaczynam od tego, jak pada światło i jak domownicy naprawdę korzystają z przestrzeni, a dopiero potem dobieram materiały, kolory i meble.</p>
+      <a class="ghost" href="#">Jak wygląda współpraca</a>
+    </div>
+  </div>
+</section>
+
 <script>
 (() => {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const stage = document.getElementById('stage');
   const layers = [
     { el: document.getElementById('wall'),  seed: 7,  skew: 0.0 },
-    { el: document.getElementById('floor'), seed: 19, skew: 0.55 }
+    { el: document.getElementById('floor'), seed: 19, skew: 0.55 },
+    { el: document.getElementById('sq'),    seed: 31, skew: 0.0 }
   ];
 
   // Seeded random so the branch layout is identical on every load.
@@ -362,7 +398,7 @@ h1 em { font-style: italic; color: var(--bronze-deep); }
   const loop = ms => {
     frame(ms);
     px += (tx - px) * 0.04; py += (ty - py) * 0.04;
-    casts.forEach((c, i) => c.style.transform = `translate(${px * (i ? -10 : -16)}px, ${py * (i ? -6 : -10)}px)`);
+    casts.forEach((c, i) => { const d = c.parentElement.dataset; c.style.transform = `translate(${px * -(+d.px || (i ? 10 : 16))}px, ${py * -(+d.py || (i ? 6 : 10))}px)`; });
     if (started) stage.style.transform = `scale(${1 + sy * 0.06}) translate(${px * 6}px, ${sy * 30 + py * 4}px)`;
     requestAnimationFrame(loop);
   };
